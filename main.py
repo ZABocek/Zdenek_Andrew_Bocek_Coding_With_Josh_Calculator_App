@@ -17,38 +17,45 @@ buttons = ["7", "8", "9", "/",
 clear = QPushButton("C")
 delete = QPushButton("Del")
 
+def format_text(text):
+    """ Helper function to format numbers with commas. """
+    try:
+        # Split text to handle commas formatting for only the number part
+        if "." in text:
+            parts = text.split(".")
+            parts[0] = "{:,}".format(int(parts[0]))  # Add commas to integer part
+            return ".".join(parts)
+        else:
+            return "{:,}".format(int(text))  # If there's no decimal, just format the number
+    except ValueError:
+        return text  # If the input is not purely numeric (e.g., has operators), return as is
+
 # Function to handle button clicks
 def button_click():
     button = app.sender()
     text = button.text()
     
     if text == "=":
-        symbol = text_box.text()
+        symbol = text_box.text().replace(",", "")  # Remove commas for eval
         try:
-            # Evaluate the expression
             res = eval(symbol)
-            
-            # Format the result with commas
             formatted_res = "{:,}".format(res)
-            
-            # Set the result in the text box with bold, larger font
             text_box.setText(formatted_res)
-            text_box.setFont(QFont("Arial", 14, QFont.Bold))  # Set larger, bold font
-            
+            text_box.setFont(QFont("Arial", 14, QFont.Bold))  # Larger, bold font
         except Exception as e:
             text_box.setText("Error")
             text_box.setFont(QFont("Arial", 14, QFont.Bold))  # Bold font for error
-            
     elif text == "C":
         text_box.clear()
         text_box.setFont(QFont())  # Reset to default font
-        
     elif text == "Del":
-        current_text = text_box.text()
-        text_box.setText(current_text[:-1])
+        current_text = text_box.text().replace(",", "")
+        text_box.setText(format_text(current_text[:-1]))  # Remove last char and reformat
     else:
-        current_text = text_box.text()
-        text_box.setText(current_text + text)
+        current_text = text_box.text().replace(",", "")  # Remove commas for accurate input
+        new_text = current_text + text
+        text_box.setText(format_text(new_text))  # Update with formatted text
+        text_box.setFont(QFont("Arial", 14, QFont.Bold))  # Apply bold font
 
 # Create the grid layout for buttons
 row = 0
